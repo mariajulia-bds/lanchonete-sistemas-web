@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pedidos | Lanchonete</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="api.js" defer></script>
+    <script src="pedidos.js" defer></script>
+</head>
+<body>
+    <header><a class="marca" href="cardapio.html">Lanchonete<span>Feito na hora, do seu jeito.</span></a><nav aria-label="Navegação principal"><a href="cardapio.html">Cardápio</a><a href="pedidos.html" aria-current="page">Pedidos</a></nav></header>
+    <main>
+        <div class="titulo"><div><span class="etiqueta">NA COZINHA</span><h1>Pedidos em aberto.</h1><p>Confira os itens e feche os pedidos que já foram atendidos.</p></div><button id="atualizar" type="button" class="secundario">Atualizar pedidos</button></div>
+        <p id="aviso" role="status" aria-live="polite">Carregando os pedidos…</p>
+        <div id="pedidos" class="grade-pedidos" aria-label="Pedidos em aberto"></div>
+        <p id="resultado" role="status" aria-live="polite"></p>
+    </main>
+    <footer>Lanchonete · Cardápio e pedidos</footer>
+</body>
+</html>

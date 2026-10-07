@@ -1,0 +1,44 @@
+:root { font-family: "Segoe UI", Arial, sans-serif; color: #352a25; background: #faf7f2; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px max(24px, calc((100vw - 1100px) / 2)); background: #fff; border-bottom: 1px solid #eee3d6; }
+.marca { text-decoration: none; color: #a93824; font-size: 27px; font-weight: 750; letter-spacing: -1px; }
+.marca span { display: block; color: #9b8b7d; font-size: 11px; font-weight: 400; letter-spacing: 0; margin-top: 5px; }
+nav { display: flex; gap: 8px; }
+nav a { padding: 11px 17px; color: #7c6d61; text-decoration: none; border-radius: 7px; font-size: 14px; }
+nav a[aria-current] { color: #a93824; background: #faeee7; font-weight: 600; }
+main { max-width: 1148px; margin: auto; padding: 48px 24px; min-height: calc(100vh - 170px); }
+.titulo { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.etiqueta, .codigo { color: #b36545; font-size: 10px; font-weight: 650; letter-spacing: 1.6px; }
+h1 { font-size: clamp(28px, 4vw, 43px); font-weight: 650; margin: 11px 0; letter-spacing: -1.4px; }
+.titulo p { color: #938273; font-size: 14px; margin: 0; line-height: 1.6; }
+button, input { font: inherit; }
+button { background: #a93824; color: #fff; border: 1px solid #a93824; padding: 13px 20px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 600; }
+button:hover { background: #892d1d; }
+button:disabled { opacity: .5; cursor: wait; }
+.secundario { color: #8d5036; background: transparent; border-color: #dac4b0; }
+.secundario:hover { background: #f4e9dc; }
+button:focus-visible, a:focus-visible, input:focus { outline: 3px solid #d79e5f; outline-offset: 3px; }
+.grade-produtos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.produto, .pedido { padding: 26px; border: 1px solid #eadfce; border-radius: 12px; background: #fff; }
+h2 { font-size: 21px; margin: 16px 0 12px; font-weight: 600; letter-spacing: -.5px; overflow-wrap: anywhere; }
+.preco { font-size: 23px; font-weight: 600; color: #a93824; margin: 18px 0 10px; }
+.estoque { font-size: 12px; color: #72804d; margin-bottom: 26px; }
+label { display: block; font-size: 12px; font-weight: 600; color: #867563; margin-bottom: 8px; }
+input { padding: 12px; border: 1px solid #decebb; border-radius: 6px; background: #fefcf9; color: #352a25; width: 100%; min-width: 0; }
+input:disabled { opacity: .5; }
+.finalizar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 18px; padding: 26px; border-radius: 12px; border: 1px solid #eadfce; background: #f2eadf; margin-top: 25px; }
+.finalizar > div { flex: 1; min-width: 200px; }
+.finalizar button { min-height: 45px; }
+.finalizar p { width: 100%; font-size: 11px; color: #968371; margin: 0; }
+[role=status] { font-size: 14px; line-height: 1.7; color: #64793b; overflow-wrap: anywhere; }
+[role=status]:empty { display: none; }
+[role=status].erro { color: #ae3127; }
+#resultado:not(:empty) { margin-top: 22px; padding: 16px; background: #fff; border: 1px solid #e4dbcc; border-radius: 8px; }
+.grade-pedidos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.pedido ul { list-style: none; padding: 0; font-size: 13px; color: #897867; line-height: 1.8; }
+.pedido li { padding: 8px 0; border-bottom: 1px solid #f2ece4; }
+.pedido button { width: 100%; margin-top: 8px; }
+footer { padding: 23px; border-top: 1px solid #eadfce; font-size: 11px; text-align: center; color: #a79584; }
+@media (max-width: 900px) { .grade-produtos { grid-template-columns: repeat(2, 1fr); } .grade-pedidos { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 550px) { header { padding: 20px 16px; gap: 10px; } .marca { font-size: 23px; } .marca span { font-size: 9px; } nav a { padding: 10px; font-size: 12px; } main { padding: 30px 16px; } .titulo { align-items: flex-start; flex-direction: column; } .grade-produtos, .grade-pedidos { grid-template-columns: 1fr; } .produto, .pedido { padding: 23px; } .finalizar { padding: 20px; } .finalizar button { width: 100%; } }

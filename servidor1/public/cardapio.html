@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cardápio | Lanchonete</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="api.js" defer></script>
+    <script src="cardapio.js" defer></script>
+</head>
+<body>
+    <header><a class="marca" href="cardapio.html">Lanchonete<span>Feito na hora, do seu jeito.</span></a><nav aria-label="Navegação principal"><a href="cardapio.html" aria-current="page">Cardápio</a><a href="pedidos.html">Pedidos</a></nav></header>
+    <main>
+        <div class="titulo"><div><span class="etiqueta">BATEU A FOME?</span><h1>Escolha seu pedido.</h1><p>Informe seu nome e a quantidade de cada produto que deseja.</p></div><button id="atualizar" type="button" class="secundario">Atualizar cardápio</button></div>
+        <p id="aviso-catalogo" role="status" aria-live="polite">Carregando o cardápio…</p>
+        <form id="form-pedido">
+            <div id="produtos" class="grade-produtos" aria-label="Produtos disponíveis"></div>
+            <section class="finalizar"><div><label for="cliente">Seu nome</label><input id="cliente" name="NomeCliente" type="text" required maxlength="100" autocomplete="name" placeholder="Como podemos chamar você?"></div><button id="enviar" type="submit" disabled>Fazer pedido</button><p>O valor final aparece após a confirmação do pedido.</p></section>
+        </form>
+        <p id="resultado" role="status" aria-live="polite"></p>
+    </main>
+    <footer>Lanchonete · Cardápio e pedidos</footer>
+</body>
+</html>
