@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { iniciar, parar, encerrar, requisicao, urls } from './servidores.mjs';
 
 const item = (CodigoProduto, Qtd) => ({ CodigoProduto, Qtd });
@@ -12,6 +14,63 @@ test('Lanchonete: rotas, atomicidade e três processos independentes', async t =
         const ids = [];
         for (const numero of [1, 2, 3]) ids.push(await iniciar(numero));
         assert.equal(new Set(ids).size, 3);
+
+        await t.test('Servidores de pedidos e estoque exigem a variável de ambiente', () => {
+            for (const chave of [undefined, '', '   ']) {
+                const ambiente = { ...process.env };
+                delete ambiente.CHAVE_ESTOQUE;
+                if (chave !== undefined) {
+                    ambiente.CHAVE_ESTOQUE = chave;
+                }
+                for (const numero of [2, 3]) {
+                    const arquivo = fileURLToPath(new URL(`../servidor${numero}/server.js`, import.meta.url));
+                    const resultado = spawnSync(process.execPath, [arquivo], {
+                        env: ambiente,
+                        encoding: 'utf8',
+                        windowsHide: true,
+                        timeout: 8000
+                    });
+                    assert.equal(resultado.status, 1);
+                    assert.ok(resultado.stderr.includes('Configure a variável de ambiente CHAVE_ESTOQUE'));
+                }
+            }
+        });
+
+        await t.test('Estoque bloqueia chave ausente ou incorreta sem alterar os dados', async () => {
+            const antes = await estoque();
+            for (const chave of [undefined, 'chave-incorreta']) {
+                for (const rota of ['/estoque', '/baixa', '/reposicao']) {
+                    const cabecalhos = { 'Content-Type': 'application/json' };
+                    if (chave !== undefined) {
+                        cabecalhos['X-Chave-Estoque'] = chave;
+                    }
+                    const resposta = await fetch(urls[3] + rota, {
+                        method: rota === '/estoque' ? 'GET' : 'POST',
+                        headers: cabecalhos,
+                        body: rota === '/estoque' ? undefined : JSON.stringify({ Itens: [item(1, 1)] }),
+                        signal: AbortSignal.timeout(8000)
+                    });
+                    assert.equal(resposta.status, 403);
+                    assert.deepEqual(await resposta.json(), { erro: 'Acesso negado.' });
+                }
+            }
+            assert.deepEqual(await estoque(), antes);
+        });
+
+        await t.test('Páginas e respostas do negócio não entregam a chave interna', async () => {
+            for (const rota of ['/', '/pedidos.html', '/api.js', '/cardapio.js', '/pedidos.js']) {
+                const resposta = await fetch(urls[1] + rota);
+                const conteudo = await resposta.text();
+                assert.ok(!conteudo.includes('CHAVE_ESTOQUE'));
+                assert.ok(!conteudo.includes('X-Chave-Estoque'));
+            }
+            const catalogo = await requisicao(2, '/produtos');
+            assert.equal(catalogo.status, 200);
+            assert.equal(catalogo.headers.get('X-Chave-Estoque'), null);
+            for (const produto of catalogo.dados) {
+                assert.deepEqual(Object.keys(produto).sort(), ['CodigoProduto', 'Estoque', 'NomeProduto', 'Preco']);
+            }
+        });
 
         await t.test('Servidor 1 entrega páginas e assets, sem API ou acesso direto ao estoque', async () => {
             for (const rota of ['/', '/cardapio.html', '/pedidos.html', '/style.css', '/api.js', '/cardapio.js', '/pedidos.js']) {

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
@@ -9,13 +9,34 @@
     <script src="pedidos.js" defer></script>
 </head>
 <body>
-    <header><a class="marca" href="cardapio.html">Lanchonete<span>Feito na hora, do seu jeito.</span></a><nav aria-label="Navegação principal"><a href="cardapio.html">Cardápio</a><a href="pedidos.html" aria-current="page">Pedidos</a></nav></header>
+    <header>
+        <a class="marca" href="cardapio.html">Lanchonete</a>
+        <nav aria-label="Navegação principal">
+            <a href="cardapio.html">Cardápio</a>
+            <a href="pedidos.html" aria-current="page">Pedidos</a>
+        </nav>
+    </header>
     <main>
-        <div class="titulo"><div><span class="etiqueta">NA COZINHA</span><h1>Pedidos em aberto.</h1><p>Confira os itens e feche os pedidos que já foram atendidos.</p></div><button id="atualizar" type="button" class="secundario">Atualizar pedidos</button></div>
-        <p id="aviso" role="status" aria-live="polite">Carregando os pedidos…</p>
-        <div id="pedidos" class="grade-pedidos" aria-label="Pedidos em aberto"></div>
-        <p id="resultado" role="status" aria-live="polite"></p>
+        <div class="cabecalho-conteudo">
+            <h1>Pedidos</h1>
+            <button id="atualizar-pedidos" type="button">Atualizar pedidos</button>
+        </div>
+        <p id="aviso-pedidos" role="status" aria-live="polite">Carregando os pedidos…</p>
+        <div class="area-tabela">
+            <table aria-label="Pedidos em aberto">
+                <thead>
+                    <tr>
+                        <th scope="col">Número</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Itens</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="pedidos"></tbody>
+            </table>
+        </div>
+        <p id="mensagem-resultado" role="status" aria-live="polite"></p>
     </main>
-    <footer>Lanchonete · Cardápio e pedidos</footer>
 </body>
 </html>

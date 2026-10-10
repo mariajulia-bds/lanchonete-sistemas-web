@@ -1,50 +1,31 @@
-
-/* Estilos gerais */
-:root {
-    font-family: "Segoe UI", Arial, sans-serif;
-    color: #352a25;
-    background-color: #faf7f2;
-}
-
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #302d29;
+    background-color: white;
 }
 
-button,
-input {
-    font: inherit;
-}
-
-/* Cabeçalho e navegação */
 header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    padding: 24px max(24px, calc((100vw - 1100px) / 2));
-    background-color: white;
-    border-bottom: 1px solid #eee3d6;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 24px;
+    border-bottom: 1px solid #e7e2da;
 }
 
 .marca {
-    color: #a93824;
-    font-size: 27px;
+    color: #92412e;
+    font-size: 26px;
     font-weight: bold;
-    letter-spacing: -1px;
     text-decoration: none;
-}
-
-.marca span {
-    display: block;
-    margin-top: 5px;
-    color: #9b8b7d;
-    font-size: 11px;
-    font-weight: normal;
-    letter-spacing: normal;
 }
 
 nav {
@@ -53,187 +34,179 @@ nav {
 }
 
 nav a {
-    padding: 11px 17px;
-    color: #7c6d61;
-    font-size: 14px;
+    padding: 9px 16px;
+    border-radius: 6px;
+    color: #59534c;
     text-decoration: none;
-    border-radius: 7px;
+}
+
+nav a:hover {
+    background-color: #f6f3ef;
 }
 
 nav a[aria-current] {
-    color: #a93824;
-    background-color: #faeee7;
+    color: #843a28;
+    background-color: #f8ece6;
     font-weight: bold;
 }
 
-/* Conteúdo principal */
 main {
-    max-width: 1148px;
-    min-height: calc(100vh - 170px);
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 48px 24px;
+    padding: 40px 24px;
 }
 
-.titulo {
+.cabecalho-conteudo {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-bottom: 24px;
 }
 
-.etiqueta,
-.codigo {
-    color: #b36545;
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 1.6px;
-}
-
 h1 {
-    margin: 11px 0;
-    font-size: clamp(28px, 4vw, 43px);
-    font-weight: 650;
-    letter-spacing: -1.4px;
-}
-
-h2 {
-    margin: 16px 0 12px;
-    font-size: 21px;
-    font-weight: 600;
-    overflow-wrap: anywhere;
-}
-
-.titulo p {
     margin: 0;
-    color: #938273;
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 30px;
 }
 
-/* Botões */
-button {
-    padding: 13px 20px;
-    color: white;
-    background-color: #a93824;
-    border: 1px solid #a93824;
-    border-radius: 7px;
+.area-tabela {
+    overflow-x: auto;
+    border: 1px solid #e1dcd4;
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 16px 18px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    color: #615549;
+    background-color: #f5f2ed;
     font-size: 13px;
     font-weight: bold;
-    cursor: pointer;
+    white-space: nowrap;
 }
 
-button:hover {
-    background-color: #892d1d;
+td {
+    border-top: 1px solid #eee9e2;
 }
 
-button:disabled {
-    opacity: 0.5;
-    cursor: wait;
+tbody tr:nth-child(even) {
+    background-color: #fcfaf7;
 }
 
-.secundario {
-    color: #8d5036;
-    background-color: transparent;
-    border-color: #dac4b0;
+td:first-child {
+    color: #6f665c;
 }
 
-.secundario:hover {
-    background-color: #f4e9dc;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus {
-    outline: 3px solid #d79e5f;
-    outline-offset: 3px;
-}
-
-/* Lista de produtos */
-.grade-produtos {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-}
-
-.produto,
-.pedido {
-    padding: 26px;
-    background-color: white;
-    border: 1px solid #eadfce;
-    border-radius: 12px;
-}
-
-.preco {
-    margin: 18px 0 10px;
-    color: #a93824;
-    font-size: 23px;
-    font-weight: 600;
-}
-
-.estoque {
-    margin-bottom: 26px;
-    color: #72804d;
-    font-size: 12px;
-}
-
-/* Campos de formulário */
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #867563;
-    font-size: 12px;
+td:nth-child(2) {
     font-weight: bold;
 }
 
+td ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 14px;
+}
+
+button,
 input {
-    width: 100%;
-    min-width: 0;
-    padding: 12px;
-    color: #352a25;
-    background-color: #fefcf9;
-    border: 1px solid #decebb;
+    font: inherit;
+    padding: 10px 14px;
+    border: 1px solid #cfc7bc;
     border-radius: 6px;
 }
 
+button {
+    color: #51473d;
+    background-color: #f7f4ef;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+button:hover:not(:disabled) {
+    background-color: #eee7dd;
+    border-color: #b4a694;
+}
+
+#enviar-pedido {
+    color: white;
+    background-color: #92412e;
+    border-color: #92412e;
+}
+
+#enviar-pedido:hover:not(:disabled) {
+    background-color: #783323;
+    border-color: #783323;
+}
+
+button:disabled,
 input:disabled {
     opacity: 0.5;
 }
 
-/* Finalização do pedido */
-.finalizar {
+button:disabled {
+    cursor: default;
+}
+
+input {
+    color: #302d29;
+    background-color: white;
+}
+
+input[type="number"] {
+    width: 85px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #92412e;
+    outline-offset: 3px;
+}
+
+.finalizar-pedido {
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-    gap: 18px;
-    margin-top: 25px;
-    padding: 26px;
-    background-color: #f2eadf;
-    border: 1px solid #eadfce;
-    border-radius: 12px;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 22px;
+    background-color: #faf8f5;
+    border: 1px solid #e7e2da;
+    border-radius: 8px;
 }
 
-.finalizar > div {
+.finalizar-pedido > div {
     flex: 1;
-    min-width: 200px;
+    min-width: 180px;
+    max-width: 380px;
 }
 
-.finalizar button {
-    min-height: 45px;
-}
-
-.finalizar p {
+#nome-cliente {
     width: 100%;
-    margin: 0;
-    color: #968371;
-    font-size: 11px;
 }
 
-/* Mensagens de retorno */
-[role="status"] {
-    color: #64793b;
+label {
+    display: block;
+    margin-bottom: 8px;
     font-size: 14px;
-    line-height: 1.7;
+    font-weight: bold;
+}
+
+[role="status"] {
+    color: #42603b;
+    line-height: 1.6;
     overflow-wrap: anywhere;
 }
 
@@ -241,104 +214,48 @@ input:disabled {
     display: none;
 }
 
+#mensagem-resultado:not(:empty) {
+    padding: 14px 18px;
+    border: 1px solid #e1dcd4;
+    border-radius: 6px;
+}
+
 [role="status"].erro {
-    color: #ae3127;
+    color: #a12626;
 }
 
-#resultado:not(:empty) {
-    margin-top: 22px;
-    padding: 16px;
-    background-color: white;
-    border: 1px solid #e4dbcc;
-    border-radius: 8px;
-}
-
-/* Pedidos */
-.grade-pedidos {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-.pedido ul {
-    padding: 0;
-    color: #897867;
-    font-size: 13px;
-    line-height: 1.8;
-    list-style: none;
-}
-
-.pedido li {
-    padding: 8px 0;
-    border-bottom: 1px solid #f2ece4;
-}
-
-.pedido button {
-    width: 100%;
-    margin-top: 8px;
-}
-
-/* Rodapé */
-footer {
-    padding: 23px;
-    color: #a79584;
-    font-size: 11px;
-    text-align: center;
-    border-top: 1px solid #eadfce;
-}
-
-/* Tablets */
-@media (max-width: 900px) {
-    .grade-produtos,
-    .grade-pedidos {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Celulares */
 @media (max-width: 550px) {
     header {
-        padding: 20px 16px;
-        gap: 10px;
-    }
-
-    .marca {
-        font-size: 23px;
-    }
-
-    .marca span {
-        font-size: 9px;
+        gap: 12px;
     }
 
     nav a {
-        padding: 10px;
-        font-size: 12px;
+        padding: 8px 12px;
     }
 
     main {
-        padding: 30px 16px;
+        padding: 24px 16px;
     }
 
-    .titulo {
-        flex-direction: column;
-        align-items: flex-start;
+    h1 {
+        font-size: 26px;
     }
 
-    .grade-produtos,
-    .grade-pedidos {
-        grid-template-columns: 1fr;
+    th,
+    td {
+        padding: 12px;
     }
 
-    .produto,
-    .pedido {
-        padding: 23px;
+    .finalizar-pedido {
+        padding: 16px;
     }
 
-    .finalizar {
-        padding: 20px;
+    .finalizar-pedido > div {
+        max-width: none;
+        width: 100%;
     }
 
-    .finalizar button {
+    #enviar-pedido {
         width: 100%;
     }
 }

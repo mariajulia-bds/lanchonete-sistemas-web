@@ -4,6 +4,11 @@ const cors = require("cors");
 const app = express();
 const PORTA = 3001;
 const URL_ESTOQUE = "http://localhost:3002";
+const CHAVE_ESTOQUE = process.env.CHAVE_ESTOQUE;
+
+if (!CHAVE_ESTOQUE || CHAVE_ESTOQUE.trim() === "") {
+    throw new Error("Configure a variável de ambiente CHAVE_ESTOQUE antes de iniciar o servidor.");
+}
 
 app.use(cors({
     origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -11,8 +16,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: "20kb" }));
 
-// Produtos mantidos pelo Servidor 2.
-// O estoque NÃO fica aqui.
 const produtos = [
     { CodigoProduto: 1, NomeProduto: "X-Burguer", Preco: 20.00 },
     { CodigoProduto: 2, NomeProduto: "X-Salada", Preco: 22.00 },
@@ -20,18 +23,13 @@ const produtos = [
     { CodigoProduto: 4, NomeProduto: "Refrigerante", Preco: 6.00 }
 ];
 
-// Pedidos ficam em memória.
-let pedidos = [];
+const pedidos = [];
 let proximoNumeroPedido = 1;
-
-
-// ========================================
-// GET /produtos
-// ========================================
 
 app.get("/produtos", async (req, res) => {
     try {
         const resposta = await fetch(`${URL_ESTOQUE}/estoque`, {
+            headers: { "X-Chave-Estoque": CHAVE_ESTOQUE },
             signal: AbortSignal.timeout(5000)
         });
 
@@ -44,7 +42,7 @@ app.get("/produtos", async (req, res) => {
             throw new Error("Resposta inválida do servidor de estoque.");
         }
 
-        const catalogo = produtos.map(produto => {
+        const catalogoProdutos = produtos.map(produto => {
             const estoqueProduto = dadosEstoque.find(
                 item => item.CodigoProduto === produto.CodigoProduto
             );
@@ -57,7 +55,7 @@ app.get("/produtos", async (req, res) => {
             };
         });
 
-        res.json(catalogo);
+        res.json(catalogoProdutos);
 
     } catch (erro) {
         res.status(503).json({
@@ -67,34 +65,28 @@ app.get("/produtos", async (req, res) => {
     }
 });
 
-
-// ========================================
-// POST /pedidos
-// ========================================
-
 app.post("/pedidos", async (req, res) => {
     try {
         if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
             return res.status(400).json({ erro: "Informe o cliente e os itens do pedido." });
         }
-        // O cliente não pode enviar preços ou um total para o pedido.
+
         if (Object.keys(req.body).some(campo => !["NomeCliente", "Itens"].includes(campo))) {
             return res.status(400).json({ erro: "Envie somente NomeCliente e Itens. O total é calculado pela API." });
         }
-        const { NomeCliente, Itens } = req.body;
+        const nomeCliente = req.body.NomeCliente;
+        const itens = req.body.Itens;
 
-        // Validação do nome
         if (
-            typeof NomeCliente !== "string" ||
-            NomeCliente.trim() === "" || NomeCliente.trim().length > 100
+            typeof nomeCliente !== "string" ||
+            nomeCliente.trim() === "" || nomeCliente.trim().length > 100
         ) {
             return res.status(400).json({
                 erro: "Nome do cliente é obrigatório."
             });
         }
 
-        // Validação da lista de itens
-        if (!Array.isArray(Itens) || Itens.length === 0) {
+        if (!Array.isArray(itens) || itens.length === 0) {
             return res.status(400).json({
                 erro: "O pedido deve possuir pelo menos um produto."
             });
@@ -102,13 +94,16 @@ app.post("/pedidos", async (req, res) => {
 
         let totalCentavos = 0;
         const itensPedido = [];
-        const quantidades = new Map();
+        const quantidadesPorProduto = new Map();
 
-        // Valida os produtos e calcula o total
-        for (const item of Itens) {
+        for (const item of itens) {
+            if (!item || typeof item !== "object" || Array.isArray(item)) {
+                return res.status(400).json({
+                    erro: "Código do produto ou quantidade inválida."
+                });
+            }
 
             if (
-                !item || typeof item !== "object" || Array.isArray(item) ||
                 Object.keys(item).some(campo => !["CodigoProduto", "Qtd"].includes(campo)) ||
                 !Number.isSafeInteger(item.CodigoProduto) || item.CodigoProduto <= 0 ||
                 !Number.isSafeInteger(item.Qtd) ||
@@ -120,7 +115,7 @@ app.post("/pedidos", async (req, res) => {
             }
 
             const produto = produtos.find(
-                p => p.CodigoProduto === item.CodigoProduto
+                produtoCadastrado => produtoCadastrado.CodigoProduto === item.CodigoProduto
             );
 
             if (!produto) {
@@ -129,15 +124,15 @@ app.post("/pedidos", async (req, res) => {
                 });
             }
 
-            const quantidade = (quantidades.get(item.CodigoProduto) || 0) + item.Qtd;
+            const quantidade = (quantidadesPorProduto.get(item.CodigoProduto) || 0) + item.Qtd;
             if (!Number.isSafeInteger(quantidade)) {
                 return res.status(400).json({ erro: "Quantidade excede o limite numérico." });
             }
-            quantidades.set(item.CodigoProduto, quantidade);
+            quantidadesPorProduto.set(item.CodigoProduto, quantidade);
         }
 
-        for (const [codigo, quantidade] of quantidades) {
-            const produto = produtos.find(p => p.CodigoProduto === codigo);
+        for (const [codigoProduto, quantidade] of quantidadesPorProduto) {
+            const produto = produtos.find(produtoCadastrado => produtoCadastrado.CodigoProduto === codigoProduto);
             totalCentavos += Math.round(produto.Preco * 100) * quantidade;
             if (!Number.isSafeInteger(totalCentavos)) {
                 return res.status(400).json({ erro: "Valor do pedido excede o limite numérico." });
@@ -150,13 +145,13 @@ app.post("/pedidos", async (req, res) => {
             });
         }
 
-        // Solicita a baixa ao Servidor 3
         const respostaEstoque = await fetch(
             `${URL_ESTOQUE}/baixa`,
             {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "X-Chave-Estoque": CHAVE_ESTOQUE
                 },
                 body: JSON.stringify({
                     Itens: itensPedido.map(item => ({ CodigoProduto: item.CodigoProduto, Qtd: item.Qtd }))
@@ -167,17 +162,15 @@ app.post("/pedidos", async (req, res) => {
 
         const resultadoEstoque = await respostaEstoque.json();
 
-        // Se o Servidor 3 rejeitar a baixa
         if (!respostaEstoque.ok) {
             return res.status(respostaEstoque.status).json({
                 erro: resultadoEstoque.erro || "Erro ao realizar baixa no estoque."
             });
         }
 
-        // Cria o pedido somente depois da baixa funcionar
         const novoPedido = {
             NumeroPedido: proximoNumeroPedido,
-            NomeCliente: NomeCliente.trim(),
+            NomeCliente: nomeCliente.trim(),
             Total: totalCentavos / 100,
             Itens: itensPedido
         };
@@ -199,19 +192,9 @@ app.post("/pedidos", async (req, res) => {
     }
 });
 
-
-// ========================================
-// GET /pedidos
-// ========================================
-
 app.get("/pedidos", (req, res) => {
     res.json(pedidos);
 });
-
-
-// ========================================
-// POST /pedidos/:id/fechar
-// ========================================
 
 app.post("/pedidos/:id/fechar", (req, res) => {
 
@@ -243,12 +226,6 @@ app.post("/pedidos/:id/fechar", (req, res) => {
     });
 });
 
-
-// ========================================
-// INICIAR SERVIDOR
-// ========================================
-
-// Respostas JSON também para JSON malformado ou corpo acima do limite.
 app.use((erro, req, res, next) => {
     if (erro.type === "entity.parse.failed" || erro.type === "entity.too.large") {
         return res.status(erro.status).json({ erro: "Corpo JSON inválido ou muito grande." });

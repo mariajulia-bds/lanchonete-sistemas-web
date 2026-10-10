@@ -3,14 +3,16 @@ import { once } from 'node:events';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { randomBytes } from 'node:crypto';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const processos = new Map();
+const chaveEstoqueTeste = randomBytes(32).toString('hex');
 export const urls = { 1: 'http://localhost:3000', 2: 'http://localhost:3001', 3: 'http://localhost:3002' };
 
 export async function iniciar(numero) {
     const porta = 2999 + numero;
-    // Não encerra nem reutiliza servidores de outra sessão.
+
     await new Promise((resolve, reject) => {
         const teste = net.createServer();
         teste.once('error', erro => reject(new Error(erro.code === 'EADDRINUSE'
@@ -19,7 +21,12 @@ export async function iniciar(numero) {
         teste.listen(porta, () => teste.close(resolve));
     });
     const pasta = path.join(raiz, `servidor${numero}`);
-    const processo = spawn(process.execPath, ['server.js'], { cwd: pasta, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    const processo = spawn(process.execPath, ['server.js'], {
+        cwd: pasta,
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, CHAVE_ESTOQUE: chaveEstoqueTeste }
+    });
     processos.set(numero, processo);
     let saida = '';
     processo.stdout.on('data', dados => { saida += dados.toString(); });
@@ -48,12 +55,19 @@ export async function encerrar() {
 }
 
 export async function requisicao(numero, rota, corpo, opcoes = {}) {
+    const cabecalhos = {};
+    if (corpo !== undefined) {
+        cabecalhos['Content-Type'] = 'application/json';
+    }
+    if (numero === 3) {
+        cabecalhos['X-Chave-Estoque'] = chaveEstoqueTeste;
+    }
     const resposta = await fetch(urls[numero] + rota, {
         method: corpo === undefined ? 'GET' : 'POST',
-        headers: corpo === undefined ? {} : { 'Content-Type': 'application/json' },
         body: corpo === undefined ? undefined : JSON.stringify(corpo),
         signal: AbortSignal.timeout(8000),
-        ...opcoes
+        ...opcoes,
+        headers: { ...cabecalhos, ...opcoes.headers }
     });
     return { status: resposta.status, headers: resposta.headers, dados: await resposta.json() };
 }

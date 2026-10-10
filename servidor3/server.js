@@ -2,6 +2,18 @@ const express = require("express");
 
 const app = express();
 const PORTA = 3002;
+const CHAVE_ESTOQUE = process.env.CHAVE_ESTOQUE;
+
+if (!CHAVE_ESTOQUE || CHAVE_ESTOQUE.trim() === "") {
+    throw new Error("Configure a variável de ambiente CHAVE_ESTOQUE antes de iniciar o servidor.");
+}
+
+app.use((req, res, next) => {
+    if (req.get("X-Chave-Estoque") !== CHAVE_ESTOQUE) {
+        return res.status(403).json({ erro: "Acesso negado." });
+    }
+    next();
+});
 
 app.use(express.json({ limit: "20kb" }));
 
@@ -16,37 +28,42 @@ app.get("/estoque", (req, res) => {
     res.json(estoque);
 });
 
-// Agrega repetições e valida o lote inteiro antes de qualquer alteração.
-function validarItens(corpo) {
+function validarItensEstoque(corpo) {
     if (!corpo || !Array.isArray(corpo.Itens) || corpo.Itens.length === 0) {
         throw new Error("Lista de produtos inválida.");
     }
-    const quantidades = new Map();
+    const quantidadesPorProduto = new Map();
     for (const item of corpo.Itens) {
         if (!item || typeof item !== "object" || Array.isArray(item) ||
             !Number.isSafeInteger(item.CodigoProduto) || item.CodigoProduto <= 0 ||
             !Number.isSafeInteger(item.Qtd) || item.Qtd <= 0) {
             throw new Error("Código do produto ou quantidade inválida.");
         }
-        const produto = estoque.find(p => p.CodigoProduto === item.CodigoProduto);
-        if (!produto) throw new Error(`Produto ${item.CodigoProduto} não encontrado.`);
-        const quantidade = (quantidades.get(produto) || 0) + item.Qtd;
-        if (!Number.isSafeInteger(quantidade)) throw new Error("Quantidade excede o limite numérico.");
-        quantidades.set(produto, quantidade);
+        const produto = estoque.find(produtoCadastrado => produtoCadastrado.CodigoProduto === item.CodigoProduto);
+        if (!produto) {
+            throw new Error(`Produto ${item.CodigoProduto} não encontrado.`);
+        }
+        const quantidade = (quantidadesPorProduto.get(produto) || 0) + item.Qtd;
+        if (!Number.isSafeInteger(quantidade)) {
+            throw new Error("Quantidade excede o limite numérico.");
+        }
+        quantidadesPorProduto.set(produto, quantidade);
     }
-    return quantidades;
+    return quantidadesPorProduto;
 }
 
 app.post("/baixa", (req, res) => {
     try {
-        const quantidades = validarItens(req.body);
-        for (const [produto, quantidade] of quantidades) {
+        const quantidadesPorProduto = validarItensEstoque(req.body);
+        for (const [produto, quantidade] of quantidadesPorProduto) {
             if (produto.Estoque < quantidade) {
                 return res.status(400).json({ erro: `Estoque insuficiente para ${produto.NomeProduto}.` });
             }
         }
-        // Não há await entre a validação e a baixa: o lote é síncrono e atômico.
-        for (const [produto, quantidade] of quantidades) produto.Estoque -= quantidade;
+
+        for (const [produto, quantidade] of quantidadesPorProduto) {
+            produto.Estoque -= quantidade;
+        }
         res.json({ mensagem: "Baixa realizada com sucesso." });
     } catch (erro) {
         res.status(400).json({ erro: erro.message });
@@ -55,13 +72,15 @@ app.post("/baixa", (req, res) => {
 
 app.post("/reposicao", (req, res) => {
     try {
-        const quantidades = validarItens(req.body);
-        for (const [produto, quantidade] of quantidades) {
+        const quantidadesPorProduto = validarItensEstoque(req.body);
+        for (const [produto, quantidade] of quantidadesPorProduto) {
             if (!Number.isSafeInteger(produto.Estoque + quantidade)) {
                 return res.status(400).json({ erro: `Estoque de ${produto.NomeProduto} excede o limite numérico.` });
             }
         }
-        for (const [produto, quantidade] of quantidades) produto.Estoque += quantidade;
+        for (const [produto, quantidade] of quantidadesPorProduto) {
+            produto.Estoque += quantidade;
+        }
         res.json({ mensagem: "Reposição realizada com sucesso." });
     } catch (erro) {
         res.status(400).json({ erro: erro.message });

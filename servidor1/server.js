@@ -4,7 +4,6 @@ const path = require("path");
 const app = express();
 const PORTA = 3000;
 
-// As páginas só podem buscar dados na API de negócio, nunca no estoque.
 app.use((req, res, next) => {
     res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; connect-src http://localhost:3001 http://127.0.0.1:3001; object-src 'none'; base-uri 'self'; form-action 'none'");
     next();
